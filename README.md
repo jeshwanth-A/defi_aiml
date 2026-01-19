@@ -1,261 +1,228 @@
-# DeFi AI/ML: Advanced Crypto Sentiment Forecaster 🚀
+# DeFi AI/ML: Crypto Price Forecaster
 
-> Leveraging LangChain, RAG, and Advanced AI/ML for Intelligent DeFi Analytics and Predictions
+> Multi-model cryptocurrency price prediction with LangChain agent integration and Google Drive persistence
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jeshwanth-A/defi_aiml/blob/main/Defi_Aiml.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jeshwanth-A/defi_aiml/blob/main/core.ipynb)
 
-## 🌟 Revolutionary Features
+## Features
 
-This project represents a cutting-edge fusion of **Decentralized Finance (DeFi)** analytics with **LangChain-powered RAG (Retrieval-Augmented Generation)**, creating an intelligent system that not only predicts cryptocurrency prices but also provides contextual insights through conversational AI.
+| Feature | Description |
+|---------|-------------|
+| **3 ML Models** | PyTorch LSTM, TensorFlow LSTM, Random Forest |
+| **LangChain Agent** | Natural language queries with tool execution |
+| **Google Drive Storage** | Persistent weights and cache across sessions |
+| **Smart Caching** | 24-hour cache for price data and predictions |
+| **Admin Logging** | Detailed cache/API/model operation logs |
+| **Interactive UI** | ipywidgets dashboard with collapsible panels |
 
-### 🎯 Core Capabilities
+## Quick Start
 
-- 🤖 **LangChain Integration**: Full RAG pipeline with FAISS vector store for intelligent data querying
-- 📊 **Multi-Model Ensemble**: PyTorch LSTM, TensorFlow LSTM, and Random Forest with automated comparison
-- 🧠 **Fine-tuned LLM**: DistilBERT with LoRA for context-aware prediction explanations
-- 🛠️ **Agent Framework**: Custom LangChain agents with specialized tools for real-time analysis
-- 🎮 **Interactive Dashboard**: Complete ipywidgets-based GUI with live model interaction
-- 💬 **Conversation Memory**: Persistent chat system with intelligent context retention
-- 📈 **Advanced Analytics**: Comprehensive visualization suite with 4-panel comparative analysis
+### 1. Open in Google Colab
 
-## 🏆 Technical Achievements
+Click the badge above or [open directly](https://colab.research.google.com/github/jeshwanth-A/defi_aiml/blob/main/core.ipynb)
 
-### Performance Metrics
-- **Model Accuracy**: MAE < 0.04 on normalized predictions
-- **Random Forest**: ~0.02-0.04 MAE
-- **PyTorch LSTM**: ~0.015-0.03 MAE  
-- **TensorFlow LSTM**: ~0.02-0.035 MAE
-- **Vector Store**: 35+ embedded documents with <2s query response
-- **Data Processing**: 60+ days of multi-feature cryptocurrency data
+### 2. Run the notebook
 
-### Advanced Architecture Components
-- **FAISS Vector Store**: Intelligent similarity search with sentence transformers
-- **Sequential Chains**: Automated analysis-to-prediction workflows
-- **Agent Tools**: CoinGecko API integration, volatility analysis, model predictions
-- **Memory System**: JSON-persistent conversation buffer
-- **Auto-fixing Dependencies**: Seamless Google Colab deployment
+The notebook will:
+- Mount Google Drive (one-time auth per session)
+- Create `My Drive/defidoza/` folder for persistence
+- Display the interactive UI
 
-## 🛠️ Tech Stack
+### 3. Train Models
 
-### Core ML/AI Framework
-- **PyTorch** - Deep learning with LSTM networks
-- **TensorFlow** - Alternative LSTM implementation
-- **Scikit-learn** - Random Forest baseline and metrics
-- **Transformers** - HuggingFace model ecosystem
-- **PEFT & LoRA** - Parameter-efficient fine-tuning
+1. Click **Train**
+2. Select token (bitcoin, ethereum, uniswap, solana, cardano)
+3. Choose days of historical data (default: 30)
+4. Select model or "All"
+5. Click **Start**
 
-### LangChain Ecosystem
-- **LangChain Core** - Chains, agents, and memory management
-- **FAISS** - Vector similarity search
-- **Sentence Transformers** - Text embeddings
-- **HuggingFace Embeddings** - Semantic understanding
+### 4. Make Predictions
 
-### Data & Visualization
-- **NumPy & Pandas** - Data manipulation and analysis
-- **Matplotlib & Seaborn** - Advanced visualization
-- **ipywidgets** - Interactive dashboard components
-- **CoinGecko API** - Real-time cryptocurrency data
+1. Click **Predict**
+2. Select token, days, target date, and model
+3. Click **Run**
+4. View results with MAE comparison
 
-## 🚀 Quick Start
+### 5. Ask Questions (LangChain)
 
-### One-Click Deployment
+Requires: `pip install langchain langchain-google-genai`
 
-1. **Launch in Google Colab** (Recommended)
-   ```
-   Click the "Open In Colab" badge above
-   ```
+1. Click **Ask**
+2. Enter Google API Key (or set `GOOGLE_API_KEY` env var)
+3. Ask natural language questions like:
+   - "What's the predicted price of bitcoin for tomorrow?"
+   - "Compare all models for ethereum"
+   - "What's the current price of solana?"
 
-2. **Run the Complete Pipeline**
-   ```python
-   # Block 1: Auto-install dependencies (with conflict resolution)
-   # Block 2: Execute full pipeline with LangChain integration
-   ```
+## Architecture
 
-3. **Interact with Dashboard**
-   - Use the interactive controls for model selection
-   - Query the RAG system with natural language
-   - Test LangChain agents with custom tools
-   - View real-time predictions and analysis
+```
+┌─────────────────────────────────────────────────────────┐
+│                     UI (ipywidgets)                     │
+├──────────┬──────────┬──────────┬───────────────────────┤
+│  Train   │ Predict  │   Ask    │   Logs (Toggle)       │
+├──────────┴──────────┴──────────┴───────────────────────┤
+│                   Core Functions                        │
+├─────────────────┬─────────────────┬────────────────────┤
+│   Data Layer    │   Model Layer   │   Agent Layer      │
+│  - CoinGecko    │  - PyTorch LSTM │  - LangChain       │
+│  - SQLite Cache │  - TF LSTM      │  - Gemini LLM      │
+│  - Smart Fetch  │  - RandomForest │  - Custom Tools    │
+├─────────────────┴─────────────────┴────────────────────┤
+│              Google Drive Storage                       │
+│  /content/drive/MyDrive/defidoza/                      │
+│  ├── cache.db          (price data + predictions)      │
+│  └── weights/                                          │
+│      ├── pytorch_lstm.pth                              │
+│      ├── tf_lstm.h5                                    │
+│      ├── rf_model.pkl                                  │
+│      └── scaler.pkl                                    │
+└─────────────────────────────────────────────────────────┘
+```
 
-### Local Installation
+## UI Layout
 
+```
+┌─────────────────────────────────────────┐
+│ Trained: pytorch, tensorflow | LangChain OK
+│ [Predict] [Ask] [Train]                 │
+├─────────────────────────────────────────┤
+│ LOG:        [Show] [Clear]              │
+│ ┌─────────────────────────────────────┐ │
+│ │ Model        Predicted   Actual  MAE│ │
+│ │ pytorch      $5.12       $5.36   0.24│
+│ └─────────────────────────────────────┘ │
+├─────────────────────────────────────────┤
+│ ADMIN LOG:  [Show] [Clear]              │
+│ ┌─────────────────────────────────────┐ │
+│ │ [CACHE] Price data: FOUND (2.5h)   │ │
+│ │ [MODEL] Loading pytorch...          │ │
+│ │ [MODEL] Inference: 0.21 -> $5.12   │ │
+│ └─────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+```
+
+## Caching System
+
+### Price Data Cache
+- **Key**: `(token, days)`
+- **Expiry**: 24 hours
+- **Storage**: SQLite `price_data` table
+
+### Prediction Cache
+- **Key**: `(token, model, days, target_date)`
+- **Expiry**: 24 hours
+- **Storage**: SQLite `predictions` table
+
+### Admin Log Categories
+| Tag | Description |
+|-----|-------------|
+| `[CACHE]` | Cache hit/miss/expired status |
+| `[API]` | CoinGecko API fetch operations |
+| `[SAVE]` | Data/prediction saves |
+| `[MODEL]` | Model loading and inference |
+
+## LangChain Agent Tools
+
+| Tool | Description |
+|------|-------------|
+| `predict_price` | Run ML prediction for a token |
+| `get_available_models` | List trained models |
+| `get_supported_tokens` | List supported cryptocurrencies |
+| `get_current_price` | Get live price from CoinGecko |
+
+### Example Agent Query
+
+```
+User: "What's the predicted price of bitcoin for tomorrow using pytorch?"
+
+Agent:
+1. Calls get_available_models() → ["pytorch", "tensorflow"]
+2. Calls predict_price(token="bitcoin", model="pytorch", target_date="2026-01-20")
+3. Returns: "The PyTorch model predicts Bitcoin at $42,150 for tomorrow."
+```
+
+## Supported Tokens
+
+- Bitcoin (`bitcoin`)
+- Ethereum (`ethereum`)
+- Uniswap (`uniswap`)
+- Solana (`solana`)
+- Cardano (`cardano`)
+
+## Requirements
+
+### Core (auto-installed in Colab)
+- PyTorch
+- TensorFlow
+- scikit-learn
+- pandas, numpy
+- ipywidgets
+
+### Optional (for Ask feature)
 ```bash
-# Clone repository
-git clone https://github.com/jeshwanth-A/defi_aiml.git
-cd defi_aiml
-
-# Install dependencies
-pip install torch torchvision torchaudio
-pip install tensorflow transformers sentence-transformers
-pip install langchain langchain-community faiss-cpu
-pip install numpy pandas matplotlib scikit-learn
-pip install ipywidgets peft datasets accelerate
-
-# Launch Jupyter
-jupyter notebook Defi_Aiml.ipynb
+pip install langchain langchain-google-genai
 ```
 
-## 📊 Dashboard Features
+## File Structure
 
-### Interactive Controls
-- **Token Selector**: Choose from multiple cryptocurrencies
-- **Model Selector**: Switch between PyTorch, TensorFlow, Random Forest
-- **RAG Query Interface**: Ask intelligent questions about historical data
-- **Agent Executor**: Test custom LangChain tools
-- **Progress Tracking**: Real-time operation monitoring
-
-### Visualization Suite
-1. **Predictions vs Actual**: Multi-model comparison chart
-2. **Error Analysis**: Absolute error tracking across models
-3. **Feature Trends**: Sentiment and volatility analysis
-4. **Performance Metrics**: Comparative MAE visualization
-
-## 🧠 LangChain Integration Details
-
-### RAG System Architecture
-```python
-# Vector Store Creation
-vectorstore = FAISS.from_documents(
-    documents,  # Historical data + news context
-    HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
-)
-
-# Intelligent Querying
-response = rag_query("What factors influenced recent price movements?")
+```
+defi_aiml/
+├── core.ipynb          # Main notebook (run this)
+├── Defi_Aiml.ipynb     # Legacy notebook
+├── README.md           # This file
+└── (on Google Drive)
+    └── defidoza/
+        ├── cache.db
+        └── weights/
 ```
 
-### Custom Agent Tools
-- **CoinGecko Tool**: Real-time cryptocurrency data fetching
-- **Volatility Calculator**: Statistical analysis of price movements
-- **Model Prediction Tool**: Direct access to trained models
+## Session Persistence
 
-### Sequential Chains
-```python
-# Analysis → Prediction Pipeline
-sequential_chain = SequentialChain(
-    chains=[analysis_chain, prediction_chain],
-    input_variables=["data_summary"],
-    output_variables=["analysis", "prediction"]
-)
-```
+| Item | Persists? | Location |
+|------|-----------|----------|
+| Model weights | ✅ Yes | Google Drive |
+| Price data cache | ✅ Yes | Google Drive |
+| Prediction cache | ✅ Yes | Google Drive |
+| Scaler | ✅ Yes | Google Drive |
 
-## 📈 Model Performance
+**Train once → Use forever** (until you want to retrain)
 
-### Ensemble Approach
-The system employs three complementary models:
+## Performance
 
-1. **Random Forest**: Baseline ensemble method
-   - Fast training and inference
-   - Good interpretability
-   - Robust to outliers
+| Model | Typical MAE | Training Time |
+|-------|-------------|---------------|
+| PyTorch LSTM | ~$0.20-0.50 | ~30s (50 epochs) |
+| TensorFlow LSTM | ~$0.25-0.60 | ~45s (50 epochs) |
+| RandomForest | ~$0.30-0.70 | ~5s |
 
-2. **PyTorch LSTM**: Custom neural network
-   - Flexible architecture
-   - Advanced optimization
-   - GPU acceleration support
+*MAE varies based on token volatility and data range*
 
-3. **TensorFlow LSTM**: Production-ready alternative
-   - Easy deployment
-   - Comprehensive ecosystem
-   - Model serving capabilities
+## Roadmap
 
-### Feature Engineering
-- **Price Features**: Current, lagged, and normalized values
-- **Volume Analysis**: Trading volume patterns
-- **Sentiment Scores**: Market sentiment indicators
-- **Volatility Metrics**: Statistical volatility measures
-- **Temporal Features**: Time-based patterns
+- [x] Multi-model training and prediction
+- [x] Google Drive persistence
+- [x] LangChain agent integration
+- [x] Admin logging system
+- [x] Collapsible UI panels
+- [ ] More tokens support
+- [ ] Backtesting engine
+- [ ] Portfolio analysis
+- [ ] Real-time streaming
 
-## 🔧 Advanced Configuration
-
-### Model Persistence
-```python
-# Automatic model saving/loading
-save_folder = '/content/drive/MyDrive/crypto_project'
-models = {
-    'pytorch': 'model_pt.pth',
-    'tensorflow': 'model_tf.h5',
-    'llm': 'finetuned_llm/',
-    'vectorstore': 'faiss_index/'
-}
-```
-
-### Memory Management
-```python
-# Conversation persistence
-conversation_memory = ConversationBufferMemory(
-    memory_key="chat_history",
-    return_messages=True
-)
-```
-
-## 📱 Usage Examples
-
-### Basic Prediction
-```python
-# Load models and predict
-model = load_pytorch_model()
-prediction = model.predict_next_prices(days=7)
-```
-
-### RAG Querying
-```python
-# Ask intelligent questions
-response = rag_query("How does sentiment affect price predictions?")
-print(response)
-```
-
-### Agent Interaction
-```python
-# Execute agent tools
-crypto_data = coingecko_tool.run('uniswap')
-volatility = volatility_tool.run('100,102,98,105,103')
-model_pred = prediction_tool.run('pytorch')
-```
-
-## 🎯 Future Enhancements
-
-- [ ] **Multi-token Analysis**: Expand to portfolio-level predictions
-- [ ] **Real-time Streaming**: Live data integration with WebSocket APIs
-- [ ] **Advanced NLP**: GPT integration for enhanced explanations
-- [ ] **Risk Management**: Volatility-adjusted position sizing
-- [ ] **Backtesting Engine**: Historical strategy validation
-- [ ] **API Deployment**: FastAPI service for production use
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **LangChain**: Revolutionary framework for LLM applications
-- **HuggingFace**: Transformers and model ecosystem
-- **CoinGecko**: Reliable cryptocurrency data API
-- **FAISS**: Efficient similarity search capabilities
-- **Google Colab**: Accessible GPU computing platform
-
-## 📞 Contact
+## Author
 
 **Jeshwanth Anumala**
-- 📧 Email: jeshwanthanumala@gmail.com
-- 🐙 GitHub: [@jeshwanth-A](https://github.com/jeshwanth-A)
-- 💼 Portfolio: [jeshwanth55.notion.site](https://jeshwanth55.notion.site/portfolio)
-- 📍 Location: Hyderabad, Telangana
+- GitHub: [@jeshwanth-A](https://github.com/jeshwanth-A)
+- Email: jeshwanthanumala@gmail.com
+- Portfolio: [jeshwanth55.notion.site](https://jeshwanth55.notion.site/portfolio)
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-⭐ **Star this repository if you find it helpful!**
+⭐ **Star this repo if you find it useful!**
 
-*Building the future of intelligent DeFi analytics, one prediction at a time.*
-
----
-
-**Latest Update**: October 31, 2025 - Added comprehensive LangChain integration with RAG capabilities
+*Last updated: January 2026*
