@@ -3,6 +3,20 @@
 
 import os
 import sys
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*google\.api_core.*Python version.*",
+    category=FutureWarning,
+)
+
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+
+    warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+except Exception:
+    pass
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -67,6 +81,11 @@ def main():
 
         try:
             response = agent.ask(user_input)
+            if not response or not str(response).strip():
+                response = (
+                    "I processed that request, but generated an empty reply. "
+                    "Please try once more."
+                )
             print(f"\nDefiDoza: {response}\n")
         except KeyboardInterrupt:
             print("\nGoodbye!")

@@ -1,3 +1,18 @@
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*google\.api_core.*Python version.*",
+    category=FutureWarning,
+)
+
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+
+    warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+except Exception:
+    pass
+
 from core.config import (
     IS_COLAB,
     TOKENS,

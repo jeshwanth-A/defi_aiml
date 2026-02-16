@@ -1,13 +1,23 @@
 import json
-import urllib.request
-import pickle
 import os
+import pickle
+import urllib.request
+import warnings
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+except Exception:  # pragma: no cover
+    InconsistentVersionWarning = Warning
+
 from core.config import admin_log, WEIGHTS_DIR, SCALER_PATH
 from core.cache import get_cached_data, save_price_data
+
+
+DEFAULT_FEATURE_COLS = ["price", "volume", "volatility", "momentum", "price_lag1"]
 
 
 def fetch_and_parse(token_id="uniswap", days=30):
@@ -40,39 +50,65 @@ def smart_fetch(token, days):
     return df
 
 
-def preprocess_data(df, fit_scaler=True):
+def _add_engineered_features(df):
     df = df.copy()
-    np.random.seed(42)
-    df["sentiment"] = np.random.uniform(-1, 1, size=len(df))
     prices = df["price"].values
     ws = min(5, len(prices))
     if len(prices) >= ws:
         vol = np.std(np.lib.stride_tricks.sliding_window_view(prices, ws), axis=1)
         df["volatility"] = np.pad(vol, (ws - 1, 0), mode="edge")
     else:
-        df["volatility"] = 0
+        df["volatility"] = 0.0
+
+    df["momentum"] = df["price"].pct_change().fillna(0.0)
+    df["price_lag1"] = df["price"].shift(1)
+
+    # Legacy compatibility: old artifacts may have used this feature.
+    if "sentiment" not in df.columns:
+        df["sentiment"] = 0.0
+
+    return df
+
+
+def _load_saved_scaler():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", InconsistentVersionWarning)
+        with open(SCALER_PATH, "rb") as f:
+            return pickle.load(f)
+
+
+def get_scaler_feature_columns(scaler):
+    cols = getattr(scaler, "feature_names_in_", None)
+    if cols is None:
+        return DEFAULT_FEATURE_COLS
+    return [str(c) for c in cols]
+
+
+def preprocess_data(df, fit_scaler=True):
+    df = _add_engineered_features(df)
 
     if fit_scaler:
         scaler = MinMaxScaler()
-        df[["price", "volume", "sentiment", "volatility"]] = scaler.fit_transform(
-            df[["price", "volume", "sentiment", "volatility"]]
-        )
+        feature_cols = DEFAULT_FEATURE_COLS
+        df[feature_cols] = scaler.fit_transform(df[feature_cols])
         os.makedirs(WEIGHTS_DIR, exist_ok=True)
         with open(SCALER_PATH, "wb") as f:
             pickle.dump(scaler, f)
     else:
-        with open(SCALER_PATH, "rb") as f:
-            scaler = pickle.load(f)
-        df[["price", "volume", "sentiment", "volatility"]] = scaler.transform(
-            df[["price", "volume", "sentiment", "volatility"]]
-        )
+        scaler = _load_saved_scaler()
+        feature_cols = get_scaler_feature_columns(scaler)
+        missing = [col for col in feature_cols if col not in df.columns]
+        if missing:
+            raise ValueError(f"Missing required features for scaler: {missing}")
+        df[feature_cols] = scaler.transform(df[feature_cols])
 
-    df["price_lag1"] = df["price"].shift(1)
     return df.dropna(), scaler
 
 
 def create_sequences(data, seq_len=10):
-    seq_len = min(seq_len, len(data) - 1)
+    if len(data) < 2:
+        return np.array([]), np.array([])
+    seq_len = max(1, min(seq_len, len(data) - 1))
     X, y = [], []
     for i in range(len(data) - seq_len):
         X.append(data.iloc[i : i + seq_len].values)
