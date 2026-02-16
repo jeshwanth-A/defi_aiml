@@ -1,65 +1,83 @@
-# DeFi AI/ML: Crypto Price Forecaster
+# DefiDoza - Crypto Price Forecaster
 
-> Multi-model cryptocurrency price prediction with LangChain agent integration
+Multi-model cryptocurrency forecasting with a local tool-calling agent.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jeshwanth-A/defi_aiml/blob/main/core.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jeshwanth-A/defi_aiml/blob/main/notebooks/train.ipynb)
 
 ## Overview
 
-A cryptocurrency price forecasting system that combines multiple ML models with a conversational AI interface. Built for Google Colab with persistent storage via Google Drive.
+- Train models in Colab with a simple ipywidgets panel.
+- Save trained artifacts to Google Drive.
+- Run the agent locally against those artifacts.
 
-## Features
+## Workflow
 
-- **Multi-Model Predictions** — PyTorch LSTM, TensorFlow LSTM, Random Forest
-- **LangChain Agent** — Natural language queries with tool execution
-- **Persistent Storage** — Weights and cache saved to Google Drive
-- **Smart Caching** — Reduces API calls and computation
-- **Interactive UI** — ipywidgets dashboard with collapsible panels
-- **Admin Logging** — Detailed operation logs for debugging
+1. **Train in Colab**
+   - Open `notebooks/train.ipynb`
+   - Run cells and train via the widget UI
+   - Artifacts are written to `/content/drive/MyDrive/defidoza/weights/`
 
-## Quick Start
+2. **Use agent locally**
+   - Set your Drive path in `.env` (`DRIVE_BASE=...`)
+   - Run `python main.py`
+   - Ask for prices and predictions
 
-1. Click the **Open in Colab** badge above
-2. Run the notebook (authorizes Google Drive on first run)
-3. **Train** → Select token and model → Start training
-4. **Predict** → Choose parameters → View results
-5. **Ask** → Natural language queries (requires API key)
+## Local Setup
 
-## Supported Tokens
+```bash
+git clone https://github.com/jeshwanth-A/defi_aiml.git
+cd defi_aiml
+pip install -r requirements.txt
+```
 
-Bitcoin • Ethereum • Uniswap • Solana • Cardano
+Create `.env` from template:
 
-## Tech Stack
+```bash
+cp .env.example .env
+```
 
-| Category | Technologies |
-|----------|--------------|
-| ML/DL | PyTorch, TensorFlow, scikit-learn |
-| LLM | LangChain, Google Gemini |
-| Data | CoinGecko API, SQLite, pandas |
-| UI | ipywidgets |
-| Storage | Google Drive |
+Set at least:
+
+```bash
+GROQ_API_KEY=your_key_here
+DRIVE_BASE=G:\My Drive\defidoza
+```
+
+Run:
+
+```bash
+python main.py
+```
 
 ## Project Structure
 
 ```
 defi_aiml/
-├── core.ipynb    # Main notebook (run this)
-└── README.md
+├── core/
+│   ├── config.py      # env + path resolution
+│   ├── cache.py       # SQLite cache helpers
+│   ├── data.py        # preprocessing + sequence builders
+│   ├── models.py      # model definitions + weight loading
+│   ├── inference.py   # local prediction logic
+│   ├── tools.py       # LangChain tools
+│   └── agent.py       # DefiDoza agent
+├── notebooks/
+│   └── train.ipynb    # self-contained training notebook (ipywidgets)
+├── main.py            # local CLI entry point
+├── .env.example
+└── requirements.txt
 ```
 
-## Requirements
+## Security / Public Repo Notes
 
-Core dependencies are auto-installed in Colab. For LangChain features:
+- `.env` is gitignored.
+- Model artifacts and cache are gitignored.
+- Do not commit API keys.
 
-```bash
-pip install langchain langchain-google-genai
-```
+## Supported Tokens
 
-## Author
-
-**Jeshwanth Anumala**  
-[GitHub](https://github.com/jeshwanth-A) • [Portfolio](https://jeshwanth55.notion.site/portfolio) • jeshwanthanumala@gmail.com
+Bitcoin, Ethereum, Uniswap, Solana, Cardano.
 
 ## License
 
-MIT License
+MIT
