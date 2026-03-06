@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.agent import build_ask_agent
 from core.models import get_trained_models
 from core.config import is_colab, get_weights_dir
+from core.rag import get_knowledge_status
 
 
 def main():
@@ -34,6 +35,11 @@ def main():
     print("=" * 50)
     print(f"Environment: {'Colab' if is_colab() else 'Local'}")
     print(f"Weights dir: {get_weights_dir()}")
+    kb_status = get_knowledge_status()
+    print(
+        "Knowledge base:",
+        "ready" if kb_status.get("index_ready") else "not built yet",
+    )
     print()
 
     trained = get_trained_models()

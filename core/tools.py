@@ -14,6 +14,7 @@ from core.data import (
 from core.inference import run_inference, get_actual_price
 from core.models import weights_exist, get_trained_models
 from core.cache import save_prediction
+from core.rag import get_knowledge_status, retrieve_knowledge
 
 
 def _normalize_token(token):
@@ -194,6 +195,33 @@ def _predict_with_models(token, days, target_date, model):
 
 
 @tool
+def knowledge_base_status() -> str:
+    """Check whether the local knowledge base and RAG index are available."""
+    return json.dumps(get_knowledge_status())
+
+
+@tool
+def search_knowledge_base(query: str, top_k: int = 3) -> str:
+    """Search curated knowledge documents for grounded crypto/project context.
+
+    Args:
+        query: The user question or topic to search for in the knowledge base.
+        top_k: Maximum number of matching chunks to return.
+    """
+    status = get_knowledge_status()
+    if not status.get("index_ready"):
+        return json.dumps(
+            {
+                "error": "Knowledge base index not found. Build it with the RAG notebook first.",
+                "status": status,
+            }
+        )
+
+    results = retrieve_knowledge(query, top_k=max(1, int(top_k or 3)))
+    return json.dumps({"query": query, "results": results, "status": status})
+
+
+@tool
 def list_supported_tokens() -> str:
     """Return the list of supported cryptocurrency token IDs."""
     return json.dumps({"tokens": TOKENS})
@@ -314,6 +342,8 @@ def predict_price(
 
 
 ALL_TOOLS = [
+    knowledge_base_status,
+    search_knowledge_base,
     list_supported_tokens,
     check_model_status,
     get_current_price,
