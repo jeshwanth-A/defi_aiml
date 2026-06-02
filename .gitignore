@@ -1,0 +1,51 @@
+# ========================
+# Secrets & Environment
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# ========================
+# Node.js / Next.js
+# ========================
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# ========================
+# IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Tool-specific
+# ========================
+.antigravitycli/
+.opencode/
