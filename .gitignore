@@ -47,5 +47,6 @@ desktop.ini
 # ========================
 # Tool-specific
 # ========================
+.cache/
 .antigravitycli/
 .opencode/

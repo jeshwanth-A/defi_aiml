@@ -1,0 +1,8 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8432:8432"
+    env_file:
+      - ./backend/.env

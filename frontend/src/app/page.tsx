@@ -13,6 +13,11 @@ type UploadedFile = {
 };
 
 const API_BASE_URL = "http://localhost:8432";
+const SUGGESTIONS = [
+  "predict ethereum price",
+  "give last 30 days ethereum prices",
+  "give ethereum price on 23rd Jan",
+];
 
 export default function Home() {
   const [ragFiles, setRagFiles] = useState<UploadedFile[]>([]);
@@ -188,6 +193,9 @@ export default function Home() {
         .bubbleAssistant { align-self: flex-start; background: #2d2d2d; }
         .bubbleStream { align-self: flex-start; background: #2d2d2d; }
         .bubbleThink { align-self: flex-start; padding: 10px 14px; border-radius: 10px; background: #2d2d2d; color: #888; font-size: 13px; }
+        .suggestionBar { padding: 10px 16px 0; border-top: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap; }
+        .suggestionBtn { padding: 6px 10px; font-size: 11px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: #9cdcfe; font-family: 'JetBrains Mono', monospace; cursor: pointer; }
+        .suggestionBtn:disabled { color: #666; cursor: not-allowed; }
         .inputBar { padding: 16px; border-top: 1px solid #333; display: flex; gap: 10px; }
         .chatInput { flex: 1; padding: 10px 14px; font-size: 13px; border-radius: 8px; border: 1px solid #444; background: #1e1e1e; color: #d4d4d4; font-family: 'JetBrains Mono', monospace; outline: none; }
         .sendBtn { padding: 10px 20px; font-size: 13px; border-radius: 8px; border: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-weight: 500; cursor: pointer; }
@@ -325,6 +333,19 @@ export default function Home() {
           </div>
 
           {/* Input Bar */}
+          <div className="suggestionBar">
+            {SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                disabled={chatLoading}
+                onClick={() => setChatInput(suggestion)}
+                className="suggestionBtn"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
           <div className="inputBar">
             <input
               value={chatInput}

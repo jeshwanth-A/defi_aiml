@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
     frontend_url2 : str = "http://localhost:3001"

@@ -1,5 +1,7 @@
 fastapi
 uvicorn[standard]
+httpx
+pydantic-settings
 sentence-transformers
 faiss-cpu
 numpy
@@ -7,3 +9,4 @@ python-multipart
 langchain
 langchain-groq
 python-dotenv
+torch
