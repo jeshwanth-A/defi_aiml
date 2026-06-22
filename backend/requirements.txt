@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 fastapi
 uvicorn[standard]
 httpx
@@ -9,4 +11,4 @@ python-multipart
 langchain
 langchain-groq
 python-dotenv
-torch
+torch==2.2.2+cpu
