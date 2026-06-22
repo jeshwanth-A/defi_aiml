@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: defi-ai-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        value: http://localhost:3000
+      - key: FRONTEND_URL2
+        value: http://localhost:3001

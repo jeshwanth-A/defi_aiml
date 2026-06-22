@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from "react";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -12,7 +12,7 @@ type UploadedFile = {
   size: number;
 };
 
-const API_BASE_URL = "http://localhost:8432";
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8432").replace(/\/$/, "");
 const SUGGESTIONS = [
   "predict ethereum price",
   "give last 30 days ethereum prices",
@@ -43,7 +43,7 @@ export default function Home() {
   async function handleUpload(
     event: React.ChangeEvent<HTMLInputElement>,
     endpoint: string,
-    setFiles: (files: UploadedFile[]) => void,
+    setFiles: Dispatch<SetStateAction<UploadedFile[]>>,
     setUploading: (v: boolean) => void,
     setError: (e: string) => void
   ) {
@@ -71,7 +71,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      const newFiles = data.files ?? [];
+      const newFiles = (data.files ?? []) as UploadedFile[];
       setFiles((prev) => [...prev, ...newFiles]);
     } catch {
       setError("Upload failed");

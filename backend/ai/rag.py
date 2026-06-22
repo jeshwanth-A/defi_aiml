@@ -1,7 +1,13 @@
-from sentence_transformers import SentenceTransformer
-import faiss
 from config import settings
-embedder = SentenceTransformer(settings.embedder_model)
+
+_embedder = None
+
+def get_embedder():
+    global _embedder
+    if _embedder is None:
+        from sentence_transformers import SentenceTransformer
+        _embedder = SentenceTransformer(settings.embedder_model)
+    return _embedder
 
 #convert a to chunks
 def chunky(a, maxi):
@@ -16,6 +22,7 @@ def chunky(a, maxi):
 
 #chunks to vectors
 def embed(a):
+    embedder = get_embedder()
     embeddings = embedder.encode(
         a,
         convert_to_numpy=True,
@@ -24,6 +31,7 @@ def embed(a):
     return embeddings
 
 async def rag_search(query: str, embeddings, chunks, top_k=3 ):
+    import faiss
 
     rag_context = ""
 

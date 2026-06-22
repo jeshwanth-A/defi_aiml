@@ -11,7 +11,7 @@ app.state.data = AppState()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url,settings.frontend_url2],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
