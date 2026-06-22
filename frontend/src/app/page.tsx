@@ -137,15 +137,18 @@ export default function Home() {
           body: JSON.stringify({ message: userMsg.content, memory_limit: memoryLimit }),
         });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.detail ?? "Chat request failed");
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.message ?? data.detail ?? "Chat request failed");
+        }
 
         const assistantMsg: ChatMessage = { role: "assistant", content: data.response };
         setMessages((prev) => [...prev, assistantMsg]);
-      } catch {
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to get response";
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "Error: Failed to get response" },
+          { role: "assistant", content: `Error: ${message}` },
         ]);
       } finally {
         setChatLoading(false);

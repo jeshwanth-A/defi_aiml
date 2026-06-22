@@ -1,7 +1,11 @@
 from ai import rag_search, lang_ai
 from fastapi import HTTPException, WebSocket
+from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
+import logging
+
+logger = logging.getLogger("defi-ai-backend")
 
 class ChatRequest(BaseModel):
     message: str
@@ -38,7 +42,17 @@ async def chat(chat_req: ChatRequest, request: Request):
     if embeddings is not None and len(embeddings) != 0 :
         rag_context = await rag_search(query, embeddings, chunks,top_k = 3)
 
-    response = await lang_ai(query, rag_context, file_context, memorylast , True )
+    try:
+        response = await lang_ai(query, rag_context, file_context, memorylast , True )
+    except Exception:
+        logger.exception("AI provider request failed on /chat")
+        return JSONResponse(
+            status_code=502,
+            content={
+                "error": "ai_provider_error",
+                "message": "AI provider request failed. Please retry."
+            }
+        )
 
     memory.append(f"user: {query}, ai: {response}")
     return {"response": response}

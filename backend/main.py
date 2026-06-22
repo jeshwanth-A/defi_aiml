@@ -42,6 +42,15 @@ def health():
         "version":"1.0.0"
     }
 
+def json_error_response(request: Request, status_code: int, content: dict) -> JSONResponse:
+    response = JSONResponse(status_code=status_code, content=content)
+    origin = request.headers.get("origin")
+    if origin and origin.rstrip("/") in settings.allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Vary"] = "Origin"
+    return response
+
 @app.middleware("http")
 async def request_logging_middleware(request: Request, call_next):
     start_time = time.perf_counter()
@@ -77,9 +86,10 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         request.method,
         request.url.path
     )
-    return JSONResponse(
-        status_code=500,
-        content={
+    return json_error_response(
+        request,
+        500,
+        {
             "error": "internal_server_error",
             "message": "Unexpected backend error"
         }
