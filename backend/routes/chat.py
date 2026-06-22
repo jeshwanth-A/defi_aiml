@@ -4,8 +4,18 @@ from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 import logging
+from config import settings
 
 logger = logging.getLogger("defi-ai-backend")
+
+def json_error_response(request: Request, status_code: int, content: dict) -> JSONResponse:
+    response = JSONResponse(status_code=status_code, content=content)
+    origin = request.headers.get("origin")
+    if origin and origin.rstrip("/") in settings.allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Vary"] = "Origin"
+    return response
 
 class ChatRequest(BaseModel):
     message: str
@@ -46,9 +56,10 @@ async def chat(chat_req: ChatRequest, request: Request):
         response = await lang_ai(query, rag_context, file_context, memorylast , True )
     except Exception:
         logger.exception("AI provider request failed on /chat")
-        return JSONResponse(
-            status_code=502,
-            content={
+        return json_error_response(
+            request,
+            502,
+            {
                 "error": "ai_provider_error",
                 "message": "AI provider request failed. Please retry."
             }
