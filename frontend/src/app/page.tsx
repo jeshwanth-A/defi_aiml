@@ -92,6 +92,7 @@ export default function Home() {
     if (!useTools) {
       const wsUrl = API_BASE_URL.replace("http", "ws");
       const ws = new WebSocket(`${wsUrl}/ws/chat`);
+      let wsCompleted = false;
       streamingRef.current = "";
 
       ws.onopen = () => {
@@ -101,6 +102,7 @@ export default function Home() {
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data.done) {
+          wsCompleted = true;
           const finalContent = streamingRef.current;
           setMessages((prev) => [...prev, { role: "assistant", content: finalContent }]);
           setStreamingText("");
@@ -115,6 +117,7 @@ export default function Home() {
       };
 
       ws.onerror = () => {
+        wsCompleted = true;
         setMessages((prev) => [...prev, { role: "assistant", content: "Error: WebSocket connection failed" }]);
         setStreamingText("");
         streamingRef.current = "";
@@ -122,7 +125,7 @@ export default function Home() {
       };
 
       ws.onclose = () => {
-        if (chatLoading) {
+        if (!wsCompleted) {
           setMessages((prev) => [...prev, { role: "assistant", content: "Error: Connection closed unexpectedly" }]);
           setStreamingText("");
           streamingRef.current = "";

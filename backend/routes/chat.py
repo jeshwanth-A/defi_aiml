@@ -1,4 +1,5 @@
 from ai import rag_search, lang_ai
+from ai.fallback import fallback_response
 from fastapi import HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Request
@@ -7,6 +8,17 @@ import logging
 from config import settings
 
 logger = logging.getLogger("defi-ai-backend")
+
+async def safe_fallback_response(query: str) -> str:
+    try:
+        return await fallback_response(query)
+    except Exception:
+        logger.exception("Fallback response failed")
+        return (
+            "The hosted AI provider is temporarily unavailable, and the backend fallback "
+            "could not complete this request. Try again in a minute or ask for recent "
+            "Ethereum price history."
+        )
 
 def json_error_response(request: Request, status_code: int, content: dict) -> JSONResponse:
     response = JSONResponse(status_code=status_code, content=content)
@@ -55,15 +67,8 @@ async def chat(chat_req: ChatRequest, request: Request):
     try:
         response = await lang_ai(query, rag_context, file_context, memorylast , True )
     except Exception:
-        logger.exception("AI provider request failed on /chat")
-        return json_error_response(
-            request,
-            502,
-            {
-                "error": "ai_provider_error",
-                "message": "AI provider request failed. Please retry."
-            }
-        )
+        logger.exception("AI provider request failed on /chat; using fallback response")
+        response = await safe_fallback_response(query)
 
     memory.append(f"user: {query}, ai: {response}")
     return {"response": response}
@@ -92,12 +97,17 @@ async def ws_chat(websocket: WebSocket):
     if embeddings is not None and len(embeddings) != 0 :
         rag_context = await rag_search(query, embeddings, chunks, top_k=3)
 
-    response = await lang_ai(query, rag_context, file_context, memorylast, False )
-
     f_response = ""
-    async for c in response:
-        await websocket.send_json({"token": c.content})
-        f_response = f_response + c.content
+    try:
+        response = await lang_ai(query, rag_context, file_context, memorylast, False )
+
+        async for c in response:
+            await websocket.send_json({"token": c.content})
+            f_response = f_response + c.content
+    except Exception:
+        logger.exception("AI provider request failed on /ws/chat; using fallback response")
+        f_response = await safe_fallback_response(query)
+        await websocket.send_json({"token": f_response})
 
     memory.append(f"user: {query}, ai: {f_response}")
     await websocket.send_json({"done": True})
