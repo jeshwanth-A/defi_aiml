@@ -101,16 +101,35 @@ async def fallback_response(query: str) -> str:
     days_match = re.search(r"\b(?:last|past|previous)?\s*(\d{1,3})\s+days?\b", lowered)
     if token_id and days_match:
         days = max(1, min(int(days_match.group(1)), 365))
-        raw = await get_prices.ainvoke({"token_id": token_id, "days": days})
+        try:
+            raw = await get_prices.ainvoke({"token_id": token_id, "days": days})
+        except Exception:
+            return (
+                f"I tried the live CoinGecko history tool for {token_id}, but it is temporarily unavailable. "
+                "The hosted AI provider is also unavailable, so this response is coming from the backend fallback."
+            )
         return _summarize_history(raw, token_id, days)
 
     exact_date = _extract_date(query)
     if token_id and exact_date and "price" in lowered:
-        raw = await get_price.ainvoke({"token_id": token_id, "date": exact_date})
+        try:
+            raw = await get_price.ainvoke({"token_id": token_id, "date": exact_date})
+        except Exception:
+            return (
+                f"I tried the live CoinGecko exact-date tool for {token_id}, but it is temporarily unavailable. "
+                "The hosted AI provider is also unavailable, so this response is coming from the backend fallback."
+            )
         return _summarize_exact_price(raw, token_id)
 
     if token_id == "ethereum" and any(word in lowered for word in ("predict", "forecast", "tomorrow", "next day", "next-day")):
-        raw = await predict_price.ainvoke({})
+        try:
+            raw = await predict_price.ainvoke({})
+        except Exception:
+            return (
+                "The hosted AI provider is temporarily unavailable, so this response is coming from "
+                "the backend fallback. The experimental Ethereum prediction tool is also temporarily "
+                "unavailable. Try recent Ethereum price history instead."
+            )
         data = _loads_json(raw)
         if data is not None and "error" in data:
             return f"I tried the Ethereum prediction tool, but it returned: {data['error']}"
