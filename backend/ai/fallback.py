@@ -135,9 +135,9 @@ async def fallback_response(query: str) -> str:
             return f"I tried the Ethereum prediction tool, but it returned: {data['error']}"
 
         return (
-            "The hosted AI provider is temporarily unavailable, so this response is coming from "
-            "the backend tool fallback. The experimental Ethereum LSTM model returned: "
-            f"{raw.strip()} Treat this as a demo prediction, not financial advice."
+            f"Ethereum prediction: {raw.strip()} "
+            "This is an experimental LSTM demo, not financial advice. "
+            "The LLM provider is unavailable, so I used the backend prediction tool directly."
         )
 
     if any(word in lowered for word in ("hello", "hi", "hey")):

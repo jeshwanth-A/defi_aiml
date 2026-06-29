@@ -25,9 +25,10 @@ async def get_prices(token_id:str, days: int) ->  str :
 @tool
 async def predict_price() -> str:
     """Predict tomorrow's Ethereum price using the saved LSTM model."""
-    check, data = read_cache("predict_price",{"token_id":"ethereum"})
+    cache_params = {"token_id": "ethereum", "model": "ethereum_lstm_v2"}
+    check, data = read_cache("predict_price", cache_params)
     if check:
         return data
     data = await predict_data()
-    write_cache("predict_price",{"token_id":"ethereum"},data,36000)
+    write_cache("predict_price", cache_params, data, 36000)
     return data
