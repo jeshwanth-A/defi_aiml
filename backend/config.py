@@ -7,7 +7,7 @@ class Settings(BaseSettings):
         "https://frontend-teal-five-45.vercel.app,"
         "https://frontend-gzihc2rum-jeshwanth-as-projects.vercel.app"
     )
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-120b"
     maxi: int = 200
     embedder_model: str = "all-MiniLM-L6-v2"
     GROQ_API_KEY: str

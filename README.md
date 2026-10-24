@@ -19,7 +19,7 @@ This project is built as a backend + AI application demo. The goal is not to pro
 | --- | --- |
 | Frontend | Next.js 16, React 19, TypeScript |
 | Backend | FastAPI, Python 3.11, Uvicorn |
-| AI orchestration | LangChain, Groq Llama 3.3 70B |
+| AI orchestration | LangChain, Groq (gpt-oss-120b) |
 | RAG | SentenceTransformers, FAISS |
 | Data | CoinGecko API |
 | ML | PyTorch LSTM |
