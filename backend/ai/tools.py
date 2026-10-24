@@ -1,6 +1,14 @@
 from langchain_core.tools import tool
 from ml import fetch_exact_date_data, fetch_price_history, predict_data
 from .cache import read_cache , write_cache
+import json
+
+def is_error(data: str) -> bool:
+    #dont cache failed calls like coingecko 429, or one bad call sticks for 10 hours
+    try:
+        return "error" in json.loads(data)
+    except (json.JSONDecodeError, TypeError):
+        return False
 
 @tool
 async def get_price(token_id: str, date: str) -> str :
@@ -9,7 +17,8 @@ async def get_price(token_id: str, date: str) -> str :
     if check:
         return data
     data = await fetch_exact_date_data(token_id,date)
-    write_cache("get_price",{"token_id":token_id,"days":date},data,36000)
+    if not is_error(data):
+        write_cache("get_price",{"token_id":token_id,"days":date},data,36000)
     return data
 
 @tool
@@ -19,7 +28,8 @@ async def get_prices(token_id:str, days: int) ->  str :
     if check:
         return data
     data = await fetch_price_history(token_id, days)
-    write_cache("get_prices",{"token_id":token_id,"days":days},data,36000)
+    if not is_error(data):
+        write_cache("get_prices",{"token_id":token_id,"days":days},data,36000)
     return data
 
 @tool
@@ -30,5 +40,6 @@ async def predict_price() -> str:
     if check:
         return data
     data = await predict_data()
-    write_cache("predict_price", cache_params, data, 36000)
+    if not is_error(data):
+        write_cache("predict_price", cache_params, data, 36000)
     return data
