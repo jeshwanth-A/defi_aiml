@@ -40,7 +40,7 @@ This project is built as a backend + AI application demo. The goal is not to pro
 - WebSocket response streaming for chat without tool calls.
 - Request logging middleware that records method, path, status code, and latency.
 - Global structured error handler for unexpected backend failures.
-- Dockerized backend for reproducible local execution.
+- Dockerized backend: the same image runs locally and on Render.
 - Next.js chat UI with file upload boxes, memory control, tool/streaming mode toggle, and prompt shortcuts.
 
 ## Architecture
