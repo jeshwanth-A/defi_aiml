@@ -1,8 +1,14 @@
 
 import httpx
+import os
 import json
 import re
 from datetime import date as date_type, datetime, timedelta, timezone
+
+def coingecko_headers() -> dict:
+    #free demo key gives us our own rate limit, render's shared ip gets 429 without it
+    key = os.getenv("COINGECKO_API_KEY")
+    return {"x-cg-demo-api-key": key} if key else {}
 
 MONTHS = {
     "jan": 1,
@@ -76,7 +82,7 @@ async def fetch_exact_date_range_data(token_id: str, normalized_date: str, reque
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, timeout=10)
+        response = await client.get(url, params=params, headers=coingecko_headers(), timeout=10)
 
     response.raise_for_status()
     data = response.json()
@@ -115,7 +121,7 @@ async def fetch_exact_date_data(token_id: str, date: str) -> str:
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=params, timeout=10)
+            response = await client.get(url, params=params, headers=coingecko_headers(), timeout=10)
 
         try:
             response.raise_for_status()
@@ -162,7 +168,7 @@ async def fetch_price_history(token_id: str, days: int) -> str:
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=params, timeout=10)
+            response = await client.get(url, params=params, headers=coingecko_headers(), timeout=10)
 
         response.raise_for_status()
         data = response.json()
@@ -198,7 +204,7 @@ async def fetch_model_window(token_id: str, days: int):
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, timeout=10)
+        response = await client.get(url, params=params, headers=coingecko_headers(), timeout=10)
 
     response.raise_for_status()
     data = response.json()

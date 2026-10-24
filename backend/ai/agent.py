@@ -2,6 +2,7 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from .tools import get_price, get_prices, predict_price
 from config import settings
+from datetime import date
 
 async def lang_ai ( query , rag_context , file_context, memory, tool_use):
 
@@ -81,6 +82,7 @@ Tool choice rules:
 
     messages = [
         SystemMessage(content =f"""You are a helpful, friendly assistant. You can answer general questions, have casual conversations, and help with various topics.
+Today's date is {date.today().isoformat()}. Any date before today is a past date.
 {tool_section}
 Rules:
 - Be natural and conversational. Don't repeat the same response word for word.

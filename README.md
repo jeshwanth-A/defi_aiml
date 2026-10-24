@@ -1,5 +1,7 @@
 # DeFi AI Analyst
 
+**Live demo:** https://frontend-teal-five-45.vercel.app (backend on Render's free tier, so the first reply can take ~50 s while it wakes up)
+
 A full-stack AI assistant for DeFi market analysis. The project combines a FastAPI backend, LangChain/Groq tool-calling, CoinGecko market-data tools, document-upload RAG with FAISS, WebSocket chat streaming, SQLite TTL caching, and an experimental PyTorch LSTM pipeline for Ethereum next-day price prediction.
 
 ## Why This Project Exists

@@ -6,7 +6,7 @@ httpx
 pydantic-settings
 sentence-transformers
 faiss-cpu
-numpy
+numpy<2
 python-multipart
 langchain
 langchain-groq
