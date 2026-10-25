@@ -9,6 +9,8 @@ services:
     envVars:
       - key: GROQ_API_KEY
         sync: false
+      - key: COINGECKO_API_KEY
+        sync: false
       - key: FRONTEND_URL
         value: https://frontend-teal-five-45.vercel.app
       - key: FRONTEND_URL2
