@@ -26,7 +26,8 @@ def make_cache_key(tool_name: str, params: dict) -> str:
     return f"{tool_name}:{params_json}"
 
 def read_cache(tool_name: str, params: dict):
-    init_cache()
+    if not CACHE_DB.exists():
+        init_cache()
 
     key = make_cache_key(tool_name, params)
     current_time = int(time.time()) #its time key created
@@ -61,7 +62,8 @@ def read_cache(tool_name: str, params: dict):
     return True, response_json
 
 def write_cache(tool_name: str, params: dict, response_json: str, ttl_seconds: int):
-    init_cache()
+    if not CACHE_DB.exists():
+        init_cache()
 
     key = make_cache_key(tool_name, params)
     created_at = int(time.time())
