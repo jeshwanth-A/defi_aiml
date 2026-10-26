@@ -3,13 +3,14 @@ from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from .tools import get_price, get_prices, predict_price
 from config import settings
 from datetime import date
+import json
 
-async def lang_ai ( query , rag_context , file_context, memory, tool_use):
+async def lang_ai ( query , rag_context , file_context, memory, tool_use, with_trace=False):
 
     llm = ChatGroq (
         api_key = settings.GROQ_API_KEY,
         model = settings.groq_model,
-        temperature = 0.8
+        temperature = 0.2
     )
 
     tools = [get_price, get_prices, predict_price]
@@ -70,6 +71,7 @@ Important:
 Tool choice rules:
 - Specific past date -> get_price.
 - Last N days / recent history -> get_prices.
+- "Recent" or "latest" data with no number of days -> get_prices with days=7.
 - Ethereum tomorrow / Ethereum next day / ETH forecast -> predict_price.
 - Non-Ethereum future prediction -> explain that only Ethereum tomorrow prediction is supported right now.
 - Greetings, casual chat, or non-crypto questions -> do not use tools.
@@ -92,9 +94,11 @@ Rules:
         HumanMessage(content = f"here is query {query} here is context {rag_context} here is file context {file_context} here is the memory {memory}")
     ]
 
+    tool_output = []
 
     if tool_use:
-        llm = llm.bind_tools(tools)
+        llm_tools = llm.bind_tools(tools)
+        rounds = 0
 
         tool_map = {
             "get_price": get_price,
@@ -103,15 +107,23 @@ Rules:
         }
 
         while True:
-            response = await llm.ainvoke(messages)
+            if rounds >= 5 :
+                messages.append(HumanMessage(content="Tool limit reached. Answer with what you have, no more tools."))
+                response = await llm.ainvoke(messages)
+                break
+            response = await llm_tools.ainvoke(messages)
             messages.append(response)
 
-            if response.tool_calls:
+            if response.tool_calls :
+                rounds += 1
                 for tool_call in response.tool_calls:
                     tool_name = tool_call["name"]
-
+                    tool_output.append(tool_name)
                     if tool_name in tool_map:
-                        result = await tool_map[tool_name].ainvoke(tool_call["args"])
+                        try:
+                            result = await tool_map[tool_name].ainvoke(tool_call["args"])
+                        except Exception as e:
+                            result = json.dumps({"error": f"{tool_name} failed: {e}"})
                         messages.append(
                             ToolMessage(
                                 content=result,
@@ -120,12 +132,9 @@ Rules:
                         )
                 continue
             else:
-                return response.content
+                break
+        if with_trace :
+            return response.content, tool_output
+        return response.content
     else:
         return llm.astream(messages)
-
-
-
-
-
-

@@ -1,14 +1,12 @@
 import torch
 import numpy as np
 import json
-import os
 from pathlib import Path
 from .model import model_load
 from .data import fetch_model_window
 
 MODEL_DIR = Path(__file__).resolve().parent
 CHECKPOINT_PATH = MODEL_DIR / "ethereum_lstm.pt"
-BUNDLED_WINDOW_PATH = MODEL_DIR / "ethereum_window.json"
 
 def create_sequences(data, lookback):
     X = []
@@ -20,24 +18,6 @@ def create_sequences(data, lookback):
         X.append(input_seq)
 
     return np.array(X, dtype=np.float32)
-
-async def load_market_window(token: str, days: int):
-    if os.getenv("PREDICT_FORCE_BUNDLED_WINDOW") != "1":
-        try:
-            prices, market_caps, volumes = await fetch_model_window(token, days)
-            return prices, market_caps, volumes, "live CoinGecko market data"
-        except Exception:
-            pass
-
-    with BUNDLED_WINDOW_PATH.open("r", encoding="utf-8") as file:
-        bundled = json.load(file)
-
-    return (
-        bundled["prices"],
-        bundled["market_caps"],
-        bundled["total_volumes"],
-        f"bundled Ethereum market window captured at {bundled.get('captured_at', 'unknown time')}",
-    )
 
 async def predict_data() ->str:
 
@@ -54,7 +34,11 @@ async def predict_data() ->str:
     feature_min = checkpoint["feature_min"]
     feature_max = checkpoint["feature_max"]
 
-    prices, market_caps, volumes, data_source = await load_market_window(token, days)
+    try:
+        prices, market_caps, volumes = await fetch_model_window(token, days)
+    except Exception as e:
+        #stop here and tell the llm, a prediction from old data answers the wrong day
+        return json.dumps({"error": f"live market data unavailable, no prediction made: {e}"})
 
     prices_np = np.array(prices, dtype=np.float32)
     market_caps_np = np.array(market_caps, dtype=np.float32)
@@ -88,4 +72,4 @@ async def predict_data() ->str:
 
     prediction_norm = prediction_norm * (feature_max[0] - feature_min[0]) + feature_min[0]
 
-    return f"predicted is {prediction_norm[-1][0]:.2f} using {data_source}."
+    return f"predicted is {prediction_norm[-1][0]:.2f} using live CoinGecko data."
